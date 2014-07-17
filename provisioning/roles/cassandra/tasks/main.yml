@@ -1,0 +1,30 @@
+---
+
+- name: Ensure that JVM is installed
+  yum: name=java-1.7.0-openjdk-devel state=latest
+
+- name: Install datastax repo
+  copy:
+    src=datastax.repo
+    dest=/etc/yum.repos.d/datastax.repo
+    owner=root group=root mode=0644
+
+- name: Install jna
+  yum: name=jna state=present
+
+- name: Install cassadra
+  yum: name=dsc20 state=present
+
+- name: Get IpTable rules
+  shell: iptables -L
+  register: iptablesrules
+  sudo: true
+
+- name: Allow cassandra rpc port through firewall
+  command: /sbin/iptables -I INPUT 1 -p tcp --dport 9160 -j ACCEPT -m comment --comment "CassandraRpc"
+  sudo: true
+  when: iptablesrules.stdout.find("CassandraRpc") == -1
+
+- name: save iptables
+  command: service iptables save
+  sudo: true

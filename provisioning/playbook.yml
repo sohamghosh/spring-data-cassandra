@@ -1,0 +1,7 @@
+---
+
+- hosts: cassandra-server
+  sudo: true
+
+  roles:
+  - cassandra
